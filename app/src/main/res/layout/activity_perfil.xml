@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="24dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:id="@+id/imgLogo"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/logo"
+        android:layout_gravity="center" />
+
+    <TextView
+        android:id="@+id/tvTituloPerfil"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mi perfil"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="@color/teal_700"
+        android:layout_marginBottom="24dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:elevation="3dp"
+        android:layout_marginBottom="40dp"
+        android:background="@drawable/bg_card"
+        android:layout_gravity="center">
+        <TextView
+            android:id="@+id/tvEmailUsuario"
+            android:text="@string/correo_ejemplo_com"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" android:layout_height="100dp" android:layout_width="100dp"/>
+
+        <TextView
+            android:id="@+id/tvPasswordUsuario"
+            android:text="@string/tvPasswordUsuario"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" android:layout_height="100dp" android:layout_width="100dp"/>
+    </LinearLayout>
+    <Button
+        android:id="@+id/btnCerrarSesion"
+        android:text="@string/cerrar_sesi_n"
+        style="@style/BotonSecundario"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"/>
+</LinearLayout>
