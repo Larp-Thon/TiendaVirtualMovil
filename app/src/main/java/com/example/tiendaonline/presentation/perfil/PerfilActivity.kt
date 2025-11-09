@@ -18,10 +18,10 @@ class PerfilActivity : ComponentActivity() {
         val tvPassword = findViewById<TextView>(R.id.tvPasswordUsuario)
 
         val email = intent.getStringExtra("EXTRA_EMAIL") ?: "No disponible"
-        val password = intent.getStringExtra("EXTRA_PASSWORD") ?: ""
+        val pass = intent.getStringExtra("EXTRA_PASSWORD") ?: ""
 
         tvEmail?.text = "Correo: $email"
-        tvPassword?.text = "Contraseña: ${"•".repeat(password.length)}"
+        tvPassword?.text = "Contraseña: ${"•".repeat(pass.length)}"
 
         val btnCerrarSesion = findViewById<Button>(R.id.btnCerrarSesion)
 
