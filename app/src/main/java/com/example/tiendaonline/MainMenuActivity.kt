@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.tiendaonline.adapter.ProductoAdapter
 import com.example.tiendaonline.data.DatabaseHelper
 import com.example.tiendaonline.models.Producto
+import com.example.tiendaonline.presentation.carrito.CarritoActivity
 import com.example.tiendaonline.presentation.perfil.PerfilActivity
 import com.example.tiendaonline.presentation.producto.CrearProductoActivity
 
@@ -33,6 +34,11 @@ class MainMenuActivity : ComponentActivity() {
                 R.id.menu_crear_producto -> {
                     val intent = Intent(this, CrearProductoActivity::class.java)
                     startActivity(intent)
+                    true
+                }
+
+                R.id.menu_ver_carrito -> {
+                    startActivity(Intent(this, CarritoActivity::class.java))
                     true
                 }
 

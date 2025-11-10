@@ -121,26 +121,6 @@ class DatabaseHelper (context: Context):
         return lista
     }
 
-    fun actualizarProducto(producto: Producto): Boolean {
-        val db = writableDatabase
-        val values = ContentValues().apply {
-            put(COLUMN_NOMBREPRODUCTO, producto.nombre)
-            put(COLUMN_DESCRIPCION, producto.descripcion)
-            put(COLUMN_PRECIO, producto.precio)
-            put(COLUMN_IMAGEN, producto.imagenUri)
-        }
-
-        val result = db.update(
-            TABLE_PRODUCTOS,
-            values,
-            "$COLUMN_IDPRODUCTO = ?",
-            arrayOf(producto.id.toString())
-        )
-
-        db.close()
-        return result > 0
-    }
-
     fun eliminarProducto(id: Int): Boolean {
         val db = writableDatabase
         val result = db.delete(TABLE_PRODUCTOS, "$COLUMN_IDPRODUCTO = ?", arrayOf(id.toString()))

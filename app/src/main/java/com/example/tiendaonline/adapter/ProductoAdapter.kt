@@ -10,9 +10,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.tiendaonline.R
 import com.example.tiendaonline.models.Producto
 import android.net.Uri
+import android.widget.Button
 import android.widget.PopupMenu
 import android.widget.Toast
 import androidx.core.net.toUri
+import com.example.tiendaonline.data.CarritoManager
 import com.example.tiendaonline.data.DatabaseHelper
 import com.example.tiendaonline.presentation.producto.CrearProductoActivity
 import java.io.File
@@ -27,6 +29,7 @@ class ProductoAdapter(
         val tvPrecio: TextView = view.findViewById(R.id.tvPrecio)
         val imgProducto: ImageView = view.findViewById(R.id.ivProducto)
         val btnMenu: ImageView = itemView.findViewById(R.id.btnMenuProducto)
+        val btnAgregarCarrito: Button = itemView.findViewById(R.id.btnAgregarCarrito)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ProductoViewHolder {
@@ -42,6 +45,7 @@ class ProductoAdapter(
         holder.tvPrecio.text = "$${producto.precio}"
 
         val imagenPath = producto.imagenUri
+
         if (!imagenPath.isNullOrEmpty()) {
             val archivo = File(imagenPath)
             if (archivo.exists()) {
@@ -51,6 +55,11 @@ class ProductoAdapter(
             }
         } else {
             holder.imgProducto.setImageResource(R.drawable.ic_launcher_background)
+        }
+
+        holder.btnAgregarCarrito.setOnClickListener {
+            CarritoManager.agregarProducto(producto)
+            Toast.makeText(holder.itemView.context, "Agregado al carrito", Toast.LENGTH_SHORT).show()
         }
 
         holder.btnMenu.setOnClickListener {

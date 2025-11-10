@@ -12,12 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TiendaOnline">
         <activity
-            android:name=".presentation.producto.CrearProductoActivity"
+            android:name=".presentation.carrito.CarritoActivity"
             android:exported="false"
-            android:label="@string/title_activity_crear_producto"
+            android:label="@string/title_activity_carrito"
             android:theme="@style/Theme.TiendaOnline" />
         <activity
-            android:name=".presentation.CrearProductoActivity"
+            android:name=".presentation.producto.CrearProductoActivity"
             android:exported="false"
             android:label="@string/title_activity_crear_producto"
             android:theme="@style/Theme.TiendaOnline" />
