@@ -59,10 +59,6 @@ class MainMenuActivity : ComponentActivity() {
             }
         }
 
-        if (!email.isNullOrEmpty()) {
-            Toast.makeText(this, "Bienvenido: $email", Toast.LENGTH_SHORT).show()
-        }
-
         val listaProductos = dbHelper.obtenerProductos()
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerProductos)
         recyclerView.layoutManager = LinearLayoutManager(this)
