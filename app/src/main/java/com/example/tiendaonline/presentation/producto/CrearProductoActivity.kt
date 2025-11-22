@@ -1,29 +1,24 @@
 package com.example.tiendaonline.presentation.producto
 
-import android.app.Activity
+import android.Manifest
+import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
+import android.provider.MediaStore
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import com.example.tiendaonline.R
 import com.example.tiendaonline.data.DatabaseHelper
 import com.example.tiendaonline.models.Producto
-import com.example.tiendaonline.presentation.producto.ui.theme.TiendaOnlineTheme
+import com.google.android.material.appbar.MaterialToolbar // Importar Toolbar
 import java.io.File
 import java.io.FileOutputStream
 
@@ -38,11 +33,16 @@ class CrearProductoActivity : ComponentActivity() {
 
     private var imagenUri: Uri? = null
     private var productoId: Int? = null
-
+    private var tempImageUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_crear_producto)
+
+        val toolbar = findViewById<MaterialToolbar>(R.id.toolbar)
+        toolbar.setNavigationOnClickListener {
+            finish()
+        }
 
         etNombre = findViewById(R.id.etNombre)
         etDescripcion = findViewById(R.id.etDescripcion)
@@ -51,29 +51,84 @@ class CrearProductoActivity : ComponentActivity() {
         btnElegirImagen = findViewById(R.id.btnElegirImagen)
         btnGuardar = findViewById(R.id.btnGuardarProducto)
 
-        // Verificar si estamos en modo edición
         val idRecibido = intent.getIntExtra("producto_id", -1)
         if (idRecibido != -1) {
             productoId = idRecibido
             cargarDatosProducto(idRecibido)
             btnGuardar.text = "Actualizar Producto"
+            toolbar.title = "Editar Producto"
         }
 
-        val seleccionarImagen =
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-                if (uri != null) {
-                    imagenUri = uri
-                    imgPreview.setImageURI(uri)
-                }
-            }
-
         btnElegirImagen.setOnClickListener {
-            seleccionarImagen.launch("image/*")
+            mostrarDialogoSeleccionImagen()
         }
 
         btnGuardar.setOnClickListener {
             guardarProducto()
         }
+    }
+
+    private fun mostrarDialogoSeleccionImagen() {
+        val opciones = arrayOf("Tomar Foto", "Elegir de Galería")
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Seleccionar Imagen")
+        builder.setItems(opciones) { _, which ->
+            when (which) {
+                0 -> verificarPermisoCamara()
+                1 -> seleccionarDeGaleria.launch("image/*")
+            }
+        }
+        builder.show()
+    }
+
+    private val seleccionarDeGaleria =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            if (uri != null) {
+                imagenUri = uri
+                imgPreview.setImageURI(uri)
+            }
+        }
+
+    private val tomarFoto =
+        registerForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
+            if (success && tempImageUri != null) {
+                imagenUri = tempImageUri
+                imgPreview.setImageURI(imagenUri)
+            }
+        }
+
+    private val requestCameraPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                abrirCamara()
+            } else {
+                Toast.makeText(this, "Permiso de cámara necesario", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+    private fun verificarPermisoCamara() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+            == PackageManager.PERMISSION_GRANTED) {
+            abrirCamara()
+        } else {
+            requestCameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    private fun abrirCamara() {
+        val archivoFoto = File.createTempFile(
+            "JPEG_${System.currentTimeMillis()}_",
+            ".jpg",
+            getExternalFilesDir(null)
+        )
+        
+        tempImageUri = FileProvider.getUriForFile(
+            this,
+            "${applicationContext.packageName}.provider",
+            archivoFoto
+        )
+        
+        tomarFoto.launch(tempImageUri)
     }
 
     private fun cargarDatosProducto(id: Int) {
@@ -111,27 +166,18 @@ class CrearProductoActivity : ComponentActivity() {
             return
         }
 
-        // Si seleccionó una nueva imagen, la copiamos. Si no, mantenemos la anterior (si es edición)
-        // OJO: Aquí hay un detalle. Si estamos editando y NO cambiamos la imagen, imagenUri podría ser null si no la seteamos al cargar.
-        // Pero en cargarDatosProducto ya hacemos imagenUri = Uri.fromFile(...), así que si tiene imagen, imagenUri no será null.
-        // Sin embargo, si imagenUri apunta a un archivo local ya existente (porque lo cargamos al editar),
-        // copiarImagenLocal volvería a copiarlo sobre sí mismo o crearía una copia nueva.
-        // Para simplificar: si la URI es "file://...", significa que ya es local y no necesitamos copiarla de nuevo.
-        
         var rutaFinal: String? = null
         
         if (imagenUri != null) {
              if (imagenUri!!.scheme == "content") {
-                 // Es una nueva imagen de la galería, hay que copiarla
                  rutaFinal = copiarImagenLocal(imagenUri!!)
-             } else {
-                 // Ya es un archivo local (file://), mantenemos la ruta
+             } else if (imagenUri!!.scheme == "file") {
                  rutaFinal = imagenUri!!.path
              }
         }
 
         val nuevoProducto = Producto(
-            id = productoId, // Si es null, es nuevo. Si tiene valor, es edición.
+            id = productoId,
             nombre = nombre,
             descripcion = descripcion,
             precio = precio,
@@ -141,7 +187,6 @@ class CrearProductoActivity : ComponentActivity() {
         val dbHelper = DatabaseHelper(this)
         
         if (productoId == null) {
-            // Crear nuevo
             val exito = dbHelper.insertarProducto(nuevoProducto)
             if (exito) {
                 Toast.makeText(this, "Producto creado exitosamente", Toast.LENGTH_SHORT).show()
@@ -150,7 +195,6 @@ class CrearProductoActivity : ComponentActivity() {
                 Toast.makeText(this, "Error al crear el producto", Toast.LENGTH_SHORT).show()
             }
         } else {
-            // Actualizar existente
             val exito = dbHelper.actualizarProducto(nuevoProducto)
             if (exito) {
                 Toast.makeText(this, "Producto actualizado exitosamente", Toast.LENGTH_SHORT).show()

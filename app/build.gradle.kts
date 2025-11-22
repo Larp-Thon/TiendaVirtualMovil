@@ -53,15 +53,13 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.appcompat)
+    implementation("com.google.android.material:material:1.11.0")
     implementation("io.coil-kt:coil:2.6.0")
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.recyclerview)
     implementation(libs.play.services.maps)
     implementation(libs.androidx.constraintlayout)
-
-
     implementation("org.osmdroid:osmdroid-android:6.1.18")
-
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

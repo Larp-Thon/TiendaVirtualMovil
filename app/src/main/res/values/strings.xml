@@ -42,4 +42,10 @@
     <string name="crear_producto">Crear producto</string>
     <string name="title_activity_contacto">Contacto</string>
     <string name="d_nde_nos_encontramos">¿Dónde nos encontramos?</string>
+    <string name="nombre_del_productoo">Nombre del producto</string>
+    <string name="descripci_n">Descripción</string>
+    <string name="precio">Precio</string>
+    <string name="vista_previa_de_imagen">Vista previa de imagen</string>
+    <string name="elegir_imagen">Elegir imagen</string>
+    <string name="guardar_producto">Guardar producto</string>
 </resources>
