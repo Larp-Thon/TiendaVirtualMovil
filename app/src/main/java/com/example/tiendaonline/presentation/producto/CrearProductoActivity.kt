@@ -37,6 +37,7 @@ class CrearProductoActivity : ComponentActivity() {
     private lateinit var btnGuardar: Button
 
     private var imagenUri: Uri? = null
+    private var productoId: Int? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +50,14 @@ class CrearProductoActivity : ComponentActivity() {
         imgPreview = findViewById(R.id.imgPreview)
         btnElegirImagen = findViewById(R.id.btnElegirImagen)
         btnGuardar = findViewById(R.id.btnGuardarProducto)
+
+        // Verificar si estamos en modo edición
+        val idRecibido = intent.getIntExtra("producto_id", -1)
+        if (idRecibido != -1) {
+            productoId = idRecibido
+            cargarDatosProducto(idRecibido)
+            btnGuardar.text = "Actualizar Producto"
+        }
 
         val seleccionarImagen =
             registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -64,6 +73,25 @@ class CrearProductoActivity : ComponentActivity() {
 
         btnGuardar.setOnClickListener {
             guardarProducto()
+        }
+    }
+
+    private fun cargarDatosProducto(id: Int) {
+        val dbHelper = DatabaseHelper(this)
+        val producto = dbHelper.obtenerProductoPorId(id)
+
+        if (producto != null) {
+            etNombre.setText(producto.nombre)
+            etDescripcion.setText(producto.descripcion)
+            etPrecio.setText(producto.precio.toString())
+
+            if (!producto.imagenUri.isNullOrEmpty()) {
+                val file = File(producto.imagenUri)
+                if (file.exists()) {
+                    imagenUri = Uri.fromFile(file)
+                    imgPreview.setImageURI(imagenUri)
+                }
+            }
         }
     }
 
@@ -83,24 +111,53 @@ class CrearProductoActivity : ComponentActivity() {
             return
         }
 
-        val rutaLocal = imagenUri?.let { copiarImagenLocal(it) }
+        // Si seleccionó una nueva imagen, la copiamos. Si no, mantenemos la anterior (si es edición)
+        // OJO: Aquí hay un detalle. Si estamos editando y NO cambiamos la imagen, imagenUri podría ser null si no la seteamos al cargar.
+        // Pero en cargarDatosProducto ya hacemos imagenUri = Uri.fromFile(...), así que si tiene imagen, imagenUri no será null.
+        // Sin embargo, si imagenUri apunta a un archivo local ya existente (porque lo cargamos al editar),
+        // copiarImagenLocal volvería a copiarlo sobre sí mismo o crearía una copia nueva.
+        // Para simplificar: si la URI es "file://...", significa que ya es local y no necesitamos copiarla de nuevo.
+        
+        var rutaFinal: String? = null
+        
+        if (imagenUri != null) {
+             if (imagenUri!!.scheme == "content") {
+                 // Es una nueva imagen de la galería, hay que copiarla
+                 rutaFinal = copiarImagenLocal(imagenUri!!)
+             } else {
+                 // Ya es un archivo local (file://), mantenemos la ruta
+                 rutaFinal = imagenUri!!.path
+             }
+        }
 
         val nuevoProducto = Producto(
-            id = null,
+            id = productoId, // Si es null, es nuevo. Si tiene valor, es edición.
             nombre = nombre,
             descripcion = descripcion,
             precio = precio,
-            imagenUri = rutaLocal
+            imagenUri = rutaFinal
         )
 
         val dbHelper = DatabaseHelper(this)
-        val exito = dbHelper.insertarProducto(nuevoProducto)
-
-        if (exito) {
-            Toast.makeText(this, "Producto creado exitosamente", Toast.LENGTH_SHORT).show()
-            finish()
+        
+        if (productoId == null) {
+            // Crear nuevo
+            val exito = dbHelper.insertarProducto(nuevoProducto)
+            if (exito) {
+                Toast.makeText(this, "Producto creado exitosamente", Toast.LENGTH_SHORT).show()
+                finish()
+            } else {
+                Toast.makeText(this, "Error al crear el producto", Toast.LENGTH_SHORT).show()
+            }
         } else {
-            Toast.makeText(this, "Error al crear el producto", Toast.LENGTH_SHORT).show()
+            // Actualizar existente
+            val exito = dbHelper.actualizarProducto(nuevoProducto)
+            if (exito) {
+                Toast.makeText(this, "Producto actualizado exitosamente", Toast.LENGTH_SHORT).show()
+                finish()
+            } else {
+                Toast.makeText(this, "Error al actualizar el producto", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

@@ -1,26 +1,23 @@
 package com.example.tiendaonline.adapter
 
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import com.example.tiendaonline.R
 import com.example.tiendaonline.models.Producto
-import android.net.Uri
-import android.widget.Button
-import android.widget.PopupMenu
-import android.widget.Toast
-import androidx.core.net.toUri
-import com.example.tiendaonline.data.CarritoManager
-import com.example.tiendaonline.data.DatabaseHelper
-import com.example.tiendaonline.presentation.producto.CrearProductoActivity
 import java.io.File
 
 class ProductoAdapter(
-    private var listaProductos: MutableList<Producto>
+    private var listaProductos: MutableList<Producto>,
+    private val onAgregarCarrito: (Producto) -> Unit,
+    private val onEditar: (Producto) -> Unit,
+    private val onEliminar: (Producto) -> Unit
 ) : RecyclerView.Adapter<ProductoAdapter.ProductoViewHolder>() {
 
     class ProductoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -44,22 +41,19 @@ class ProductoAdapter(
         holder.tvDescripcion.text = producto.descripcion
         holder.tvPrecio.text = "$${producto.precio}"
 
-        val imagenPath = producto.imagenUri
-
-        if (!imagenPath.isNullOrEmpty()) {
-            val archivo = File(imagenPath)
-            if (archivo.exists()) {
-                holder.imgProducto.setImageURI(Uri.fromFile(archivo))
-            } else {
-                holder.imgProducto.setImageResource(R.drawable.ic_launcher_background)
+        // Uso de Coil para imagenes
+        if (!producto.imagenUri.isNullOrEmpty()) {
+            holder.imgProducto.load(File(producto.imagenUri)) {
+                crossfade(true)
+                placeholder(R.drawable.ic_launcher_background)
+                error(R.drawable.ic_launcher_background)
             }
         } else {
             holder.imgProducto.setImageResource(R.drawable.ic_launcher_background)
         }
 
         holder.btnAgregarCarrito.setOnClickListener {
-            CarritoManager.agregarProducto(producto)
-            Toast.makeText(holder.itemView.context, "Agregado al carrito", Toast.LENGTH_SHORT).show()
+            onAgregarCarrito(producto)
         }
 
         holder.btnMenu.setOnClickListener {
@@ -68,23 +62,11 @@ class ProductoAdapter(
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.menu_editar -> {
-                        val context = holder.itemView.context
-                        val intent = Intent(context, CrearProductoActivity::class.java)
-                        intent.putExtra("producto_id", producto.id)
-                        context.startActivity(intent)
+                        onEditar(producto)
                         true
                     }
                     R.id.menu_eliminar -> {
-                        val context = holder.itemView.context
-                        val db = DatabaseHelper(context)
-                        val eliminado = db.eliminarProducto(producto.id!!)
-                        if (eliminado) {
-                            Toast.makeText(context, "Producto eliminado", Toast.LENGTH_SHORT).show()
-                            listaProductos.removeAt(position)
-                            notifyItemRemoved(position)
-                        } else {
-                            Toast.makeText(context, "Error al eliminar", Toast.LENGTH_SHORT).show()
-                        }
+                        onEliminar(producto)
                         true
                     }
                     else -> false
@@ -93,6 +75,7 @@ class ProductoAdapter(
             popup.show()
         }
     }
+
     override fun getItemCount(): Int = listaProductos.size
 
     fun updateData(newList: List<Producto>) {

@@ -121,12 +121,41 @@ class DatabaseHelper (context: Context):
         return lista
     }
 
+    fun obtenerProductoPorId(id: Int): Producto? {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_PRODUCTOS WHERE $COLUMN_IDPRODUCTO = ?", arrayOf(id.toString()))
+        var producto: Producto? = null
+        if (cursor.moveToFirst()) {
+            producto = Producto(
+                id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IDPRODUCTO)),
+                nombre = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NOMBREPRODUCTO)),
+                descripcion = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPCION)),
+                precio = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_PRECIO)),
+                imagenUri = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_IMAGEN))
+            )
+        }
+        cursor.close()
+        db.close()
+        return producto
+    }
+
+    fun actualizarProducto(producto: Producto): Boolean {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_NOMBREPRODUCTO, producto.nombre)
+            put(COLUMN_DESCRIPCION, producto.descripcion)
+            put(COLUMN_PRECIO, producto.precio)
+            put(COLUMN_IMAGEN, producto.imagenUri ?: "")
+        }
+        val result = db.update(TABLE_PRODUCTOS, values, "$COLUMN_IDPRODUCTO = ?", arrayOf(producto.id.toString()))
+        db.close()
+        return result > 0
+    }
+
     fun eliminarProducto(id: Int): Boolean {
         val db = writableDatabase
         val result = db.delete(TABLE_PRODUCTOS, "$COLUMN_IDPRODUCTO = ?", arrayOf(id.toString()))
         db.close()
         return result > 0
     }
-
-
 }
