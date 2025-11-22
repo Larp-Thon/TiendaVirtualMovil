@@ -3,13 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_crear_producto"
-        android:title="Crear producto"
+        android:title="@string/crear_producto"
         app:showAsAction="never" />
     <item
         android:id="@+id/menu_ver_carrito"
-        android:title="Ver carrito" />
+        android:title="@string/ver_carrito" />
     <item
         android:id="@+id/menu_mi_perfil"
-        android:title="Mi perfil"
+        android:title="@string/mi_perfil"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_contacto"
+        android:title="@string/contacto"
         app:showAsAction="never" />
 </menu>

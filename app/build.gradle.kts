@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -55,6 +56,12 @@ dependencies {
     implementation("io.coil-kt:coil:2.6.0")
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.androidx.recyclerview)
+    implementation(libs.play.services.maps)
+    implementation(libs.androidx.constraintlayout)
+
+
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

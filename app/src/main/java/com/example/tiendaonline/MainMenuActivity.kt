@@ -11,6 +11,7 @@ import com.example.tiendaonline.adapter.ProductoAdapter
 import com.example.tiendaonline.data.CarritoManager
 import com.example.tiendaonline.data.DatabaseHelper
 import com.example.tiendaonline.presentation.carrito.CarritoActivity
+import com.example.tiendaonline.presentation.contacto.Contacto
 import com.example.tiendaonline.presentation.perfil.PerfilActivity
 import com.example.tiendaonline.presentation.producto.CrearProductoActivity
 
@@ -50,6 +51,10 @@ class MainMenuActivity : ComponentActivity() {
                     startActivity(intent)
                     true
                 }
+                R.id.menu_contacto -> {
+                    startActivity(Intent(this, Contacto::class.java))
+                    true
+                }
                 else -> false
             }
         }
@@ -77,7 +82,6 @@ class MainMenuActivity : ComponentActivity() {
                 val eliminado = producto.id?.let { dbHelper.eliminarProducto(it) } ?: false
                 if (eliminado) {
                     Toast.makeText(this, "Producto eliminado", Toast.LENGTH_SHORT).show()
-                    // Actualizamos la lista visualmente
                     val nuevaLista = dbHelper.obtenerProductos()
                     productoAdapter.updateData(nuevaLista)
                 } else {
