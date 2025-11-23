@@ -25,29 +25,24 @@ class Contacto : AppCompatActivity() {
     private lateinit var binding: ActivityContactoBinding
     private var locationOverlay: MyLocationNewOverlay? = null
 
-    // Coordenadas de la tienda
     private val ubicacionTienda = GeoPoint(4.60971, -74.08175)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Cargar configuración de OSMDroid
         Configuration.getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
 
         binding = ActivityContactoBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Configuración básica del mapa
         map = binding.map
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
 
-        // Centrar inicialmente en la tienda
         val mapController = map.controller
         mapController.setZoom(15.0)
         mapController.setCenter(ubicacionTienda)
 
-        // Marcador de la tienda
         val marker = Marker(map)
         marker.position = ubicacionTienda
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)

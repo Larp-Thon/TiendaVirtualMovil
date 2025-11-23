@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TiendaVirtualMovil</string>
+    <string name="app_name">TecniShop</string>
     
     <string name="title_activity_splash">SplashActivity</string>
     <string name="title_activity_bienvenida">BienvenidaActivity</string>
